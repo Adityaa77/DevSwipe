@@ -4,7 +4,6 @@ const app=express();
 let name="Aditya";
 app.use((req,res)=>{
     res.send(`Hi my name is ${name}`)
-    res.send("Hi I am Learning Backend")  
 })
 
 
