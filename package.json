@@ -1,0 +1,23 @@
+{
+  "name": "devhinge",
+  "version": "1.0.0",
+  "description": "Meetup Apps for devs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "backend",
+    "nodejs",
+    "expressjs",
+    "javascript",
+    "reactjs"
+  ],
+  "author": "Aditya Singh",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
