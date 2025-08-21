@@ -16,6 +16,11 @@ app.get("/user",(req,res)=>{
   )
 })
 
+app.get('/user', (req, res) => {
+  // Example: /user?name=aditya
+  res.send(`Query param name: ${req.query.name}`)
+})
+
 app.post("/user",(req,res)=>{
   res.send("Data Sent Succesfully")
 });
