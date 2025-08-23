@@ -1,5 +1,8 @@
 const express=require ("express");
 
+//establishing connection with the mongodb
+require("./config/database.js");
+
 const app=express();
 const {AdminAuth}=require("./middlewares/auth.js");//to take the auth from middlewares
 let name="Aditya";
