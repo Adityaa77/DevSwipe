@@ -1,25 +1,48 @@
 const express=require ("express");
 
 const app=express();
+const {AdminAuth}=require("./middlewares/auth.js");//to take the auth from middlewares
 let name="Aditya";
 
+// /admin
+app.use("/admin",AdminAuth);
+
+app.get("/admin",(req,res)=>{
+   console.log("Admin data Aquired");
+   res.send({
+    Name:"Penaldo",
+             Age:"45",
+             Position:"Penalty Box",
+   });
+});
+
+// /hello
 app.use("/hello", (req, res) => {
   res.send(`Hello Your name is ${name}`)
 })
 
-app.get("/user",(req,res)=>{
+
+// /user
+app.get("/user",(req,res,next)=>{
+  console.log("Person 1 Data");
   res.send({Name:"Aditya",
            LastName:"Singh",
            Rollno:"22104B2012",
            Residence:"Mumbai"
-  }
-  )
+  })
+  next();
+},
+  (req,res)=>{
+    console.log("Person 2 Data");
+  res.send({
+          Name:"Aryan",
+           LastName:"Singh",
+           Rollno:"22104B2010",
+           Residence:"Mumbai"
+  })
 })
 
-app.get('/user', (req, res) => {
-  // Example: /user?name=aditya
-  res.send(`Query param name: ${req.query.name}`)
-})
+
 
 app.post("/user",(req,res)=>{
   res.send("Data Sent Succesfully")
