@@ -52,6 +52,13 @@ app.delete("/user",(req,res)=>{
   res.send("Data Deleted Succesfully")
 });
 
+
+//error handling in the end
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).send('Server Error');
+});
+
  app.listen(3000,()=>{
     console.log("Server is Succesfully Running on Port-3000");
  });
