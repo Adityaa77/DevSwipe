@@ -1,11 +1,13 @@
 const express=require ("express");
-
+//connectdb require
+const connectDB=require("./config/database.js");
 //establishing connection with the mongodb
 require("./config/database.js");
 
 const app=express();
-const {AdminAuth}=require("./middlewares/auth.js");//to take the auth from middlewares
-let name="Aditya";
+
+//to take the auth from middlewares
+const {AdminAuth}=require("./middlewares/auth.js");
 
 // /admin
 app.use("/admin",AdminAuth);
@@ -19,6 +21,7 @@ app.get("/admin",(req,res)=>{
    });
 });
 
+let name="Aditya";
 // /hello
 app.use("/hello", (req, res) => {
   res.send(`Hello Your name is ${name}`)
@@ -62,6 +65,14 @@ app.use((err, req, res, next) => {
   res.status(500).send('Server Error');
 });
 
- app.listen(3000,()=>{
+connectDB()//correct way so the data is established first and then the server is set up
+   .then(()=>{
+    console.log("Data Connection Established");
+    app.listen(3000,()=>{
     console.log("Server is Succesfully Running on Port-3000");
- });
+     });
+   })
+   .catch((err)=>{
+    console.log("Database Connection Error");
+   });
+ 
