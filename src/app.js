@@ -1,11 +1,12 @@
-const express=require ("express");
 //connectdb require
-const connectDB=require("./config/database.js");
+const express=require ("express");
 //establishing connection with the mongodb
-
+const connectDB=require("./config/database.js");
 
 const app=express();
 
+//usermodel 
+const User=require("./models/user.js");
 //to take the auth from middlewares
 const {AdminAuth}=require("./middlewares/auth.js");
 
@@ -49,13 +50,30 @@ app.get("/user",(req,res,next)=>{
 })
 
 
-
+//using post and delete
 app.post("/user",(req,res)=>{
   res.send("Data Sent Succesfully")
 });
 
 app.delete("/user",(req,res)=>{
   res.send("Data Deleted Succesfully")
+});
+
+//creating an api
+app.post("/signup",async(req,res)=>{
+  const user=new User({
+    Name:"Aditya",
+    LastName:"Singh",
+    Branch:"Extc",
+    Age:21,
+    Employed:false
+  });
+  try{
+    await user.save();
+  res.send("User Added in the Database");
+  }catch(err){
+    res.status(400).send("Error Saving the data"+err.message);
+  }
 });
 
 
