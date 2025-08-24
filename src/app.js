@@ -2,7 +2,7 @@ const express=require ("express");
 //connectdb require
 const connectDB=require("./config/database.js");
 //establishing connection with the mongodb
-require("./config/database.js");
+
 
 const app=express();
 
