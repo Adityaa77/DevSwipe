@@ -36,6 +36,15 @@ app.get("/user",async (req,res)=>{
   }
 });
 
+//feed api to get all the users from the database
+app.get("/feed",async (req,res)=>{
+  try{
+    const users=await User.find({});
+    res.send(users);
+  }catch(err){
+    res.status(400).send("Something went Wrong");
+  }
+});
 
 
 //error handling in the end
