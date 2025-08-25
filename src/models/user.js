@@ -7,14 +7,14 @@ const UserSchema = mongoose.Schema({
      LastName:{
         type: String,
      },
-     Branch:{
-        type: String,
-     },
      Age:{
         type:Number,
      },
-     Employed:{
-        type:Boolean,
+     Emailid:{
+      type:String,
+     },
+     Password:{
+      type:String,
      },
 });
 

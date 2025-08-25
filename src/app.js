@@ -4,70 +4,15 @@ const express=require ("express");
 const connectDB=require("./config/database.js");
 
 const app=express();
-
+//middleware
+app.use(express.json());
 //usermodel 
 const User=require("./models/user.js");
-//to take the auth from middlewares
-const {AdminAuth}=require("./middlewares/auth.js");
 
-// /admin
-app.use("/admin",AdminAuth);
-
-app.get("/admin",(req,res)=>{
-   console.log("Admin data Aquired");
-   res.send({
-    Name:"Penaldo",
-             Age:"45",
-             Position:"Penalty Box",
-   });
-});
-
-let name="Aditya";
-// /hello
-app.use("/hello", (req, res) => {
-  res.send(`Hello Your name is ${name}`)
-})
-
-
-// /user
-app.get("/user",(req,res,next)=>{
-  console.log("Person 1 Data");
-  res.send({Name:"Aditya",
-           LastName:"Singh",
-           Rollno:"22104B2012",
-           Residence:"Mumbai"
-  })
-  next();
-},
-  (req,res)=>{
-    console.log("Person 2 Data");
-  res.send({
-          Name:"Aryan",
-           LastName:"Singh",
-           Rollno:"22104B2010",
-           Residence:"Mumbai"
-  })
-})
-
-
-//using post and delete
-app.post("/user",(req,res)=>{
-  res.send("Data Sent Succesfully")
-});
-
-app.delete("/user",(req,res)=>{
-  res.send("Data Deleted Succesfully")
-});
 
 //creating an api
 app.post("/signup",async(req,res)=>{
-  const user=new User({
-    Name:"Aditya",
-    LastName:"Singh",
-    Branch:"Extc",
-    Age:21,
-    Employed:false
-  });
+  const user=new User(req.body);
   try{
     await user.save();
   res.send("User Added in the Database");
@@ -75,6 +20,22 @@ app.post("/signup",async(req,res)=>{
     res.status(400).send("Error Saving the data"+err.message);
   }
 });
+
+//finding the user by rollno.//always use async await and try catch
+app.get("/user",async (req,res)=>{
+  const useremail=req.body.Emailid;
+  try{
+    const users=await User.find({Emailid:useremail});
+  if(!users){
+    res.status(404).send("User not found");
+  }else{
+    res.send(users);
+  }
+  }catch(err){
+    res.status(400).send("Something went Wrong");
+  }
+});
+
 
 
 //error handling in the end
