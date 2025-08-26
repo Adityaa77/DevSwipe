@@ -50,10 +50,20 @@ app.get("/feed",async (req,res)=>{
 
 
 //updating user
-app.patch("/user",async (req,res)=>{
-  const userId=req.body.userId;
+app.patch("/user/:userId",async (req,res)=>{
+  const userId=req.params?.userId;
   const data=req.body;
+
   try{
+    //to only allow certain things to update 
+    const Allowed_Updates=["Gender","Skills","PhotoUrl","Password"];
+   const isUpdateAllowed=Object.keys(data).every((k)=>
+  Allowed_Updates.includes(k)
+  );
+  if(!isUpdateAllowed){
+    throw new Error("Update not Allowed")
+  }
+    //normal update things
   const user =await User.findByIdAndUpdate({ _id:userId},data,{
     returnDocument:"after",
     runValidators: true,
