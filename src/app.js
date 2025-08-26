@@ -2,8 +2,10 @@
 const express=require ("express");
 //establishing connection with the mongodb
 const connectDB=require("./config/database.js");
-
+//to call express
 const app=express();
+//to connect utils validate
+const {validateSignUPData}=require("./utls/validation.js");
 //middleware
 app.use(express.json());
 //usermodel 
@@ -12,12 +14,18 @@ const User=require("./models/user.js");
 
 //creating an api
 app.post("/signup",async(req,res)=>{
+
+   //validation of data
+  validateSignUPData(req);
+
+  //creating a new instance of user model
   const user=new User(req.body);
+ 
   try{
     await user.save();
   res.send("User Added in the Database");
   }catch(err){
-    res.status(400).send("Error Saving the data"+err.message);
+    res.status(400).send("Error :"+err.message);
   }
 });
 
