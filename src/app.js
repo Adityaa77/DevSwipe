@@ -12,25 +12,33 @@ app.use(express.json());
 const User=require("./models/user.js");
 //addding bcrypt
 const bcrypt=require("bcrypt")
+//cookie parser
+const cookieParser =require("cookie-parser")
+app.use(cookieParser());
+//jwt
+const jwt = require("jsonwebtoken");
 
 
 //creating an api
 app.post("/signup",async(req,res)=>{
-
    //validation of data
   validateSignUPData(req);
-const {Password}=req.body;  
 
 //encrypt the password
-const passwordhash=bcrypt.hash(Password,10);
+const { Name, LastName, Emailid, Password } = req.body;
+if (!Password) {
+  return res.status(400).send("Password is required");
+}
+//encrypt the password
+const passwordhash = await bcrypt.hash(Password, 10);
 
 //creating a new instance of user model
-  const user=new User({
-   Name,
-   LastName,
-   Emailid,
-   Password:passwordhash,
-  });
+const user = new User({
+  Name,
+  LastName,
+  Emailid,
+  Password: passwordhash,
+});
  
   try{
     await user.save();
@@ -43,24 +51,22 @@ const passwordhash=bcrypt.hash(Password,10);
 //login
 app.post("/login", async (req, res) => {
   try {
-    const { emailId, password } = req.body;
-
-    const user = await User.findOne({ emailId: emailId });
+    const { Emailid, Password } = req.body;
+    const user = await User.findOne({ Emailid });
     if (!user) {
-      throw new Error("Invalid credentials");
+     throw new Error("Invalid credentials");
     }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+const isPasswordValid = await bcrypt.compare(Password, user.Password);
 
     if (isPasswordValid) {
  
       //create jwt token
-
+      const token = await jwt.sign({_id:user._id},"Dev@Swipe$2004")
+      console.log(token);
       //add the token to the cookie and send to the user
+      res.cookie("token",token);
+      res.send("Login Succesful!!");
 
-
-
-
-      res.send("Login Successful!!!");
     } else {
       throw new Error("Invalid credentials");
     }
@@ -68,6 +74,25 @@ app.post("/login", async (req, res) => {
     res.status(400).send("ERROR: " + err.message);
   }
 });
+
+//profile
+app.get("/profile",async (req,res)=>{
+  try{const cookies =req.cookies;
+
+  const{token}=cookies;
+  if(!token){
+    throw new Error("Invalid Tokern");
+  }
+  //validate my token
+const decodedmessage= await jwt.verify(token,"Dev@Swipe$2004")
+console.log(decodedmessage);
+const{_id}=decodedmessage;
+console.log("Logged in User is: "+_id);
+
+  res.send("Reading Cookies");}catch(err){
+    res.status(400).send("Error:"+ err.message);
+  }
+})
 
 
 //finding the user by rollno.//always use async await and try catch

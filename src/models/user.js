@@ -9,10 +9,10 @@ const UserSchema = mongoose.Schema({
      },
      LastName:{
         type: String,
+        required: true,
      },
      Age:{
         type:Number,
-        required: true,
         min:18,
      },
      Gender:{
