@@ -10,6 +10,8 @@ const {validateSignUPData}=require("./utls/validation.js");
 app.use(express.json());
 //usermodel 
 const User=require("./models/user.js");
+//addding bcrypt
+const bcrypt=require("bcrypt")
 
 
 //creating an api
@@ -17,9 +19,18 @@ app.post("/signup",async(req,res)=>{
 
    //validation of data
   validateSignUPData(req);
+const {Password}=req.body;  
 
-  //creating a new instance of user model
-  const user=new User(req.body);
+//encrypt the password
+const passwordhash=bcrypt.hash(Password,10);
+
+//creating a new instance of user model
+  const user=new User({
+   Name,
+   LastName,
+   Emailid,
+   Password:passwordhash,
+  });
  
   try{
     await user.save();
@@ -28,6 +39,36 @@ app.post("/signup",async(req,res)=>{
     res.status(400).send("Error :"+err.message);
   }
 });
+
+//login
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Invalid credentials");
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
+ 
+      //create jwt token
+
+      //add the token to the cookie and send to the user
+
+
+
+
+      res.send("Login Successful!!!");
+    } else {
+      throw new Error("Invalid credentials");
+    }
+  } catch (err) {
+    res.status(400).send("ERROR: " + err.message);
+  }
+});
+
 
 //finding the user by rollno.//always use async await and try catch
 app.get("/user",async (req,res)=>{
