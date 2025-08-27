@@ -15,8 +15,10 @@ const bcrypt=require("bcrypt")
 //cookie parser
 const cookieParser =require("cookie-parser")
 app.use(cookieParser());
-//jwt
+//adding jwt
 const jwt = require("jsonwebtoken");
+//adding user auth
+const { UserAuth, AdminAuth } = require("./middlewares/auth");
 
 
 //creating an api
@@ -76,23 +78,14 @@ const isPasswordValid = await bcrypt.compare(Password, user.Password);
 });
 
 //profile
-app.get("/profile",async (req,res)=>{
-  try{const cookies =req.cookies;
-
-  const{token}=cookies;
-  if(!token){
-    throw new Error("Invalid Tokern");
+app.get("/profile", UserAuth ,async (req,res)=>{
+  try {
+    const currentUser = req.user; // after middleware attaches user to req
+    res.send(currentUser);
+  } catch (err) {
+    res.status(400).send("Error:" + err.message);
   }
-  //validate my token
-const decodedmessage= await jwt.verify(token,"Dev@Swipe$2004")
-console.log(decodedmessage);
-const{_id}=decodedmessage;
-console.log("Logged in User is: "+_id);
-
-  res.send("Reading Cookies");}catch(err){
-    res.status(400).send("Error:"+ err.message);
-  }
-})
+});
 
 
 //finding the user by rollno.//always use async await and try catch

@@ -10,24 +10,32 @@ const AdminAuth=(req,res,next)=>{
 };
 
 const jwt=require("jsonwebtoken");
-const user=require("../models/user");
+const User=require("../models/user");
 const UserAuth=async (req,res,next)=>{
     //reading then toker from the cookies
-    try{const {token}=req.cookies;
+    try{
+        const {token}=req.cookies;
+        if(!token){
+            throw new Error("Token is Invalid");
+        }
     
     const decodeObj=await jwt.verify(token,"Dev@Swipe$2004")
     
     const{_id}=decodeObj;
 
-    const user=await user.findById(_id);
+    const user = await User.findById(_id);
+
     if(!user){
         throw new Error("User Not Found");
     }
-    next();}catch(err){
+    req.user=user;
+    next();
+     }catch(err){
         res.status(400).send("Error:"+err.message);
     }
 }
 
 module.exports={
     AdminAuth,
+    UserAuth,
 };
