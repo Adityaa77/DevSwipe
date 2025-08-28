@@ -60,7 +60,7 @@ const UserSchema = mongoose.Schema({
      },
      Skills:{
       type:[String],
-      unique:true,
+      //unique:true
       validate(value){
          if(value.length>10){
             throw new Error("More Than 10 Skills are not Allowed")

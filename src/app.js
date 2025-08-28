@@ -19,15 +19,16 @@ app.use(cookieParser());
 const jwt = require("jsonwebtoken");
 //adding user auth
 const { UserAuth, AdminAuth } = require("./middlewares/auth");
+const user = require("./models/user.js");
 
-
+//userAuth Added so its secure and only used when user is logged in
 //creating an api
 app.post("/signup",async(req,res)=>{
    //validation of data
   validateSignUPData(req);
 
 //encrypt the password
-const { Name, LastName, Emailid, Password } = req.body;
+const { Name, LastName, Emailid, Password, } = req.body;
 if (!Password) {
   return res.status(400).send("Password is required");
 }
@@ -40,6 +41,7 @@ const user = new User({
   LastName,
   Emailid,
   Password: passwordhash,
+  Skills: []
 });
  
   try{
@@ -87,6 +89,13 @@ app.get("/profile", UserAuth ,async (req,res)=>{
   }
 });
 
+//sending connection request
+app.post("/SendConnectionRequest",UserAuth,async(req,res)=>{
+const user=req.user;
+  console.log("Sending Connection Request");
+
+  res.send(user.Name+" Sent Connection request")
+})
 
 //finding the user by rollno.//always use async await and try catch
 app.get("/user",async (req,res)=>{
