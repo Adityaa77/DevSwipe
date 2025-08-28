@@ -1,7 +1,8 @@
 const mongoose=require("mongoose");
 //validator
 const validator=require("validator");
-
+//bcrypt
+const bcrypt=require("bcrypt");
 const UserSchema = mongoose.Schema({
      Name:{
         type: String,
@@ -70,10 +71,29 @@ const UserSchema = mongoose.Schema({
          }
       }
      },
-},{
+},
+{
    timestamps:true,
 });
 
+UserSchema.methods.getJWT=async function () {
+   const user=this;
+
+   const token=await jwt.sign({_id:user._id},"Dev@Swipe$2004",
+      //adding expiry  
+      {
+       expiresIn:"1d",
+      });
+      return token;
+}
+
+UserSchema.methods.getPassword=async function (PasswordInputbyUser) {
+   const user=this;
+    const passwordHash=user.Password;
+   const password=await bcrypt.compare(PasswordInputbyUser,passwordHash);
+
+   return password;
+}
 //you can write both directly
 module.exports=mongoose.model("User",UserSchema);
 
