@@ -3,6 +3,9 @@ const mongoose=require("mongoose");
 const validator=require("validator");
 //bcrypt
 const bcrypt=require("bcrypt");
+//jwt
+const jwt=require("jsonwebtoken");
+
 const UserSchema = mongoose.Schema({
      Name:{
         type: String,

@@ -65,7 +65,7 @@ const isPasswordValid = await user.getPassword(Password);
     if (isPasswordValid) {
  
       //create jwt token
-      const token = await user.getJwt();
+      const token = await user.getJWT();
 
       console.log(token);
       //add the token to the cookie and send to the user
