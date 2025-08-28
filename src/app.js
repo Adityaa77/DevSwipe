@@ -4,153 +4,22 @@ const express=require ("express");
 const connectDB=require("./config/database.js");
 //to call express
 const app=express();
-//to connect utils validate
-const {validateSignUPData}=require("./utls/validation.js");
 //middleware
 app.use(express.json());
-//usermodel 
-const User=require("./models/user.js");
-//addding bcrypt
-const bcrypt=require("bcrypt")
 //cookie parser
 const cookieParser =require("cookie-parser")
 app.use(cookieParser());
-//adding jwt
-const jwt = require("jsonwebtoken");
+//userAuth Added so its secure and only used when user is logged in
 //adding user auth
 const { UserAuth, AdminAuth } = require("./middlewares/auth");
 const user = require("./models/user.js");
+const authRouter=require("./routes/auth.js");
+const profileRouter=require("./routes/profile.js");
+const requestRouter=require("./routes/ConnectionReq.js");
 
-//userAuth Added so its secure and only used when user is logged in
-//creating an api
-app.post("/signup",async(req,res)=>{
-   //validation of data
-  validateSignUPData(req);
-
-//encrypt the password
-const { Name, LastName, Emailid, Password, } = req.body;
-if (!Password) {
-  return res.status(400).send("Password is required");
-}
-//encrypt the password
-const passwordhash = await bcrypt.hash(Password, 10);
-
-//creating a new instance of user model
-const user = new User({
-  Name,
-  LastName,
-  Emailid,
-  Password: passwordhash,
-  Skills: []
-});
- 
-  try{
-    await user.save();
-  res.send("User Added in the Database");
-  }catch(err){
-    res.status(400).send("Error :"+err.message);
-  }
-});
-
-//login
-app.post("/login", async (req, res) => {
-  try {
-    const { Emailid, Password } = req.body;
-    const user = await User.findOne({ Emailid });
-    if (!user) {
-     throw new Error("Invalid credentials");
-    }
-const isPasswordValid = await user.getPassword(Password);
-
-    if (isPasswordValid) {
- 
-      //create jwt token
-      const token = await user.getJWT();
-
-      console.log(token);
-      //add the token to the cookie and send to the user
-      res.cookie("token",token);
-      res.send("Login Succesful!!");
-
-    } else {
-      throw new Error("Invalid credentials");
-    }
-  } catch (err) {
-    res.status(400).send("ERROR: " + err.message);
-  }
-});
-
-//profile
-app.get("/profile", UserAuth ,async (req,res)=>{
-  try {
-    const currentUser = req.user; // after middleware attaches user to req
-    res.send(currentUser);
-  } catch (err) {
-    res.status(400).send("Error:" + err.message);
-  }
-});
-
-//sending connection request
-app.post("/SendConnectionRequest",UserAuth,async(req,res)=>{
-const user=req.user;
-  console.log("Sending Connection Request");
-
-  res.send(user.Name+" Sent Connection request")
-})
-
-//finding the user by rollno.//always use async await and try catch
-app.get("/user",async (req,res)=>{
-  const useremail=req.body.Emailid;
-  try{
-    const users=await User.find({Emailid:useremail});
-  if(!users){
-    res.status(404).send("User not found");
-  }else{
-    res.send(users);
-  }
-  }catch(err){
-    res.status(400).send("Something went Wrong");
-  }
-});
-
-//feed api to get all the users from the database
-app.get("/feed",async (req,res)=>{
-  try{
-    const users=await User.find({});
-    res.send(users);
-  }catch(err){
-    res.status(400).send("Something went Wrong");
-  }
-});
-
-//deleting the data 
-
-
-//updating user
-app.patch("/user/:userId",async (req,res)=>{
-  const userId=req.params?.userId;
-  const data=req.body;
-
-  try{
-    //to only allow certain things to update 
-    const Allowed_Updates=["Gender","Skills","PhotoUrl","Password"];
-   const isUpdateAllowed=Object.keys(data).every((k)=>
-  Allowed_Updates.includes(k)
-  );
-  if(!isUpdateAllowed){
-    throw new Error("Update not Allowed")
-  }
-    //normal update things
-  const user =await User.findByIdAndUpdate({ _id:userId},data,{
-    returnDocument:"after",
-    runValidators: true,
-  });
-  console.log(user);
-  res.send("User updated Succesfully");
-}catch(err){
-  res.status(400).send("Update Failed:"+ err.message);
-}
-});
+app.use("/",authRouter);
+app.use("/",profileRouter);
+app.use("/",requestRouter);
 
 //error handling in the end
 app.use((err, req, res, next) => {
