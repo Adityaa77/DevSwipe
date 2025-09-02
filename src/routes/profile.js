@@ -38,7 +38,7 @@ profileRouter.patch("/profile/edit", UserAuth ,async (req,res)=>{
   //This can be done but this is not the best way
   // res.send(`${loggedinuser.Name} Your Profile was Updated Succesfully`);
 
-  res.join({
+  res.json({
     message:`${loggedinuser.Name} Your Profile was Updated Succesfully`,
     data: loggedinuser,
   });
