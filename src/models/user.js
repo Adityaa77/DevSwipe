@@ -10,6 +10,10 @@ const UserSchema = mongoose.Schema({
      Name:{
         type: String,
         required: true,
+        index: true,
+        //there is also unique index available but if you 
+        //put it you wont be able to save the same names which is not good
+        
      },
      LastName:{
         type: String,
