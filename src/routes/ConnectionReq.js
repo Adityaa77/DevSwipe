@@ -13,7 +13,7 @@ try{
    const status=req.params.status;
 
    //add this to tell which status are allowed
-   const allowedStatus=["ignored","interested"];
+  const allowedStatus=["ignored","interested"];
    if(!allowedStatus.includes(status)){
     return res.status(404).json({message:"Status is Incorrect"});
    }
@@ -59,5 +59,37 @@ if (status === "ignored") {
   res.status(400).send("Error:"+err.message);
 }
 })
+
+requestRouter.post("/request/review/:status/:requestId",UserAuth,
+  async (req,res)=>{    
+    try{
+    const loggedinUser=req.user;
+   const {status,requestId}=req.params;
+
+   const allowedStatus=["accepted","rejected"];
+   if(!allowedStatus.includes(status)){
+    return res.status(400).json({message:`${status} not allowed`});
+   }
+
+   const connectionRequest=await ConnectionRequest.findOne({
+    _id:requestId,
+    touserId: loggedinUser._id,
+    status:"interested",
+   })
+
+   if(!connectionRequest){
+    return res.status(400)
+    .json({message:"Connection Request not Found"})
+   }
+
+   connectionRequest.status=status;
+
+   const data=await connectionRequest.save();
+   
+   res.json({message:"Connection Request "+status,data});
+    }catch(err){
+      res.status(400).send("Error:"+err.message);
+    }
+  })
 
 module.exports=requestRouter;
