@@ -5,7 +5,7 @@ const User=require("../models/user.js");
 const ConnectionRequest = require("../models/connectionrequest");
 const userRouter=express.Router();
 
-//deleting the data 
+const USER_SAFE_DATA="Name lastName PhotoUrl Age Gender About Skills"
 
 //updating user
 userRouter.patch("/user/:userId",async (req,res)=>{
@@ -67,7 +67,7 @@ userRouter.get("/user/requests/received",UserAuth,async (req,res)=>{
     const connectionRequests=await ConnectionRequest.find({
     touserId: loggedinUser._id,
     status:"interested"
-    }).populate("fromUserId", ["Name", "lastName"]);
+    }).populate("fromUserId",USER_SAFE_DATA);
 
     res.join({
       message:"Data sent Succesfully",
@@ -82,6 +82,23 @@ userRouter.get("/user/requests/received",UserAuth,async (req,res)=>{
 userRouter.get("/user/requests/received",UserAuth,async (req,res)=>{
   try{
     const loggedinUser=req.user;
+   
+    const connectionRequests=await ConnectionRequest.find({
+      $or:[
+        {touserId:loggedinUser._id,status:"accepted"},
+        {fromUserId:loggedinUser._id,status:"accepted"},
+      ],
+    }).populate("fromUserid",USER_SAFE_DATA)
+    .populate("toUserid",USER_SAFE_DATA);
+
+    const data=connectionRequests.map(row=> {
+      if(row.fromUserId._id.toString()===loggedinUser._id.toString()){
+        return row.touserId;
+      }
+      return row.fromUserId
+    });
+
+    res.json({data: connectionRequests});
   }catch(err){
     return res.status(400).send({message:err.message})
   }
