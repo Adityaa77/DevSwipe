@@ -16,10 +16,12 @@ const user = require("./models/user.js");
 const authRouter=require("./routes/auth.js");
 const profileRouter=require("./routes/profile.js");
 const requestRouter=require("./routes/ConnectionReq.js");
+const userRouter=require("./routes/user.js");
 
 app.use("/",authRouter);
 app.use("/",profileRouter);
 app.use("/",requestRouter);
+app.use("/",userRouter);
 
 //error handling in the end
 app.use((err, req, res, next) => {

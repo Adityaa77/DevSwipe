@@ -2,7 +2,7 @@ const { UserAuth, AdminAuth } = require("../middlewares/auth");
 const express=require("express");
 //usermodel 
 const User=require("../models/user.js");
-
+const ConnectionRequest = require("../models/connectionrequest");
 const userRouter=express.Router();
 
 //deleting the data 
@@ -56,6 +56,34 @@ userRouter.get("/feed",async (req,res)=>{
     res.send(users);
   }catch(err){
     res.status(400).send("Something went Wrong");
+  }
+});
+
+//get all the pending connection request for the logged in user 
+userRouter.get("/user/requests/received",UserAuth,async (req,res)=>{
+   try{
+    const loggedinUser=req.user;
+    //jtr find will return array and find one will return object
+    const connectionRequests=await ConnectionRequest.find({
+    touserId: loggedinUser._id,
+    status:"interested"
+    }).populate("fromUserId", ["Name", "lastName"]);
+
+    res.join({
+      message:"Data sent Succesfully",
+      data: connectionRequests,
+    })
+
+   }catch(err){
+    req.statusCode(400).send("Error:"+err.message);
+   }
+})
+
+userRouter.get("/user/requests/received",UserAuth,async (req,res)=>{
+  try{
+    const loggedinUser=req.user;
+  }catch(err){
+    return res.status(400).send({message:err.message})
   }
 });
 
