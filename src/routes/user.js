@@ -3,6 +3,7 @@ const express=require("express");
 //usermodel 
 const User=require("../models/user.js");
 const ConnectionRequest = require("../models/connectionrequest");
+const user = require("../models/user.js");
 const userRouter=express.Router();
 
 const USER_SAFE_DATA="Name lastName PhotoUrl Age Gender About Skills"
@@ -49,15 +50,6 @@ userRouter.get("/user",async (req,res)=>{
   }
 });
 
-//feed api to get all the users from the database
-userRouter.get("/feed",async (req,res)=>{
-  try{
-    const users=await User.find({});
-    res.send(users);
-  }catch(err){
-    res.status(400).send("Something went Wrong");
-  }
-});
 
 //get all the pending connection request for the logged in user 
 userRouter.get("/user/requests/received",UserAuth,async (req,res)=>{
@@ -69,17 +61,17 @@ userRouter.get("/user/requests/received",UserAuth,async (req,res)=>{
     status:"interested"
     }).populate("fromUserId",USER_SAFE_DATA);
 
-    res.join({
+    res.json({
       message:"Data sent Succesfully",
       data: connectionRequests,
     })
 
    }catch(err){
-    req.statusCode(400).send("Error:"+err.message);
+    req.status(400).send("Error:"+err.message);
    }
 })
 
-userRouter.get("/user/requests/received",UserAuth,async (req,res)=>{
+userRouter.get("/user/connections",UserAuth,async (req,res)=>{
   try{
     const loggedinUser=req.user;
    
@@ -88,8 +80,8 @@ userRouter.get("/user/requests/received",UserAuth,async (req,res)=>{
         {touserId:loggedinUser._id,status:"accepted"},
         {fromUserId:loggedinUser._id,status:"accepted"},
       ],
-    }).populate("fromUserid",USER_SAFE_DATA)
-    .populate("toUserid",USER_SAFE_DATA);
+    }).populate("fromUserId",USER_SAFE_DATA)
+    .populate("toUserId",USER_SAFE_DATA);
 
     const data=connectionRequests.map(row=> {
       if(row.fromUserId._id.toString()===loggedinUser._id.toString()){
@@ -104,4 +96,42 @@ userRouter.get("/user/requests/received",UserAuth,async (req,res)=>{
   }
 });
 
+//to feed the user the accepted connections
+userRouter.get("/feed",UserAuth,async(req,res)=>{
+  try{
+   const loggedinUser=req.user;
+
+   const page=parseInt(req.query.page) ||1;
+   const limit=parseInt(req.query.limit)||10;
+   limit=limit>50?50:limit;
+
+   const skip=(page-1)* limit;
+
+   const connectionRequests=await ConnectionRequest.find({
+    $or:[
+      {fromUserId:loggedinUser._id},{touserI:loggedinUser._id},
+    ]
+   }).select("fromUserId toUserId");
+
+   const hiddenUsersFromFeed=new Set();
+   connectionRequests.forEach((req)=>{
+    hiddenUsersFromFeed.add(req.fromUserId.toString());
+    hiddenUsersFromFeed.add(req.touserId.toString());
+   });
+    
+  const users=await User.find({
+    $and: [
+      {_id: {$nin: Array.from(hiddenUsersFromFeed)}},
+      {_id: {$ne: loggedinUser._id}},
+    ],
+  })
+  .select(USER_SAFE_DATA)
+  .skip(skip)
+  .limit(limit);
+
+  res.send(users);
+  }catch(err){
+    res.status(400).send("Error:"+err.message);
+  }
+})
 module.exports=userRouter;
