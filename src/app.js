@@ -4,11 +4,15 @@ const express=require ("express");
 const connectDB=require("./config/database.js");
 //to call express
 const app=express();
+//cors
+const cors=require("cors");
+app.use(cors());
 //middleware
 app.use(express.json());
 //cookie parser
 const cookieParser =require("cookie-parser")
 app.use(cookieParser());
+
 //userAuth Added so its secure and only used when user is logged in
 //adding user auth
 const { UserAuth, AdminAuth } = require("./middlewares/auth");
