@@ -6,7 +6,10 @@ const connectDB=require("./config/database.js");
 const app=express();
 //cors
 const cors=require("cors");
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173/",
+  credentials:true,
+}));
 //middleware
 app.use(express.json());
 //cookie parser
