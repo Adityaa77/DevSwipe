@@ -16,7 +16,7 @@ const UserAuth=async (req,res,next)=>{
     try{
         const {token}=req.cookies;
         if(!token){
-            throw new Error("Token is Invalid");
+            return res.status(401).send("Please Login First");
         }
     
     const decodeObj=await jwt.verify(token,"Dev@Swipe$2004")
