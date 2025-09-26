@@ -6,7 +6,7 @@ const ConnectionRequest = require("../models/connectionrequest");
 const user = require("../models/user.js");
 const userRouter=express.Router();
 
-const USER_SAFE_DATA="Name lastName PhotoUrl Age Gender About Skills"
+const USER_SAFE_DATA="Name LastName PhotoUrl Age Gender About Skills"
 
 //updating user
 userRouter.patch("/user/:userId",async (req,res)=>{
@@ -102,14 +102,14 @@ userRouter.get("/feed",UserAuth,async(req,res)=>{
    const loggedinUser=req.user;
 
    const page=parseInt(req.query.page) ||1;
-   const limit=parseInt(req.query.limit)||10;
+   let limit=parseInt(req.query.limit)||10;
    limit=limit>50?50:limit;
 
    const skip=(page-1)* limit;
 
    const connectionRequests=await ConnectionRequest.find({
     $or:[
-      {fromUserId:loggedinUser._id},{touserI:loggedinUser._id},
+      {fromUserId:loggedinUser._id},{touserId:loggedinUser._id},
     ]
    }).select("fromUserId toUserId");
 
@@ -129,7 +129,7 @@ userRouter.get("/feed",UserAuth,async(req,res)=>{
   .skip(skip)
   .limit(limit);
 
-  res.send(users);
+  res.json({ data: users });
   }catch(err){
     res.status(400).send("Error:"+err.message);
   }
