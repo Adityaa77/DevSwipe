@@ -13,6 +13,7 @@ const authRouter=express.Router();
 
 //creating an api
 authRouter.post("/signup",async(req,res)=>{
+  try{
    //validation of data
   validateSignUPData(req);
 
@@ -33,9 +34,15 @@ const user = new User({
   Skills: []
 });
  
-  try{
-    await user.save();
-  res.send("User Added in the Database");
+  
+  const savedUser =await user.save();
+  const token=await savedUser.getJWT();
+
+  res.cookie("token",token,{
+    expires:newDate(Date.now()+8*3600000),
+  })
+
+  res.json({message: "User added Succesfully",data: savedUser});
   }catch(err){
     res.status(400).send("Error :"+err.message);
   }
