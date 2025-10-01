@@ -29,8 +29,8 @@ try{
     { fromuserId: touserId, touserId: fromuserId },
   ],
 });
-   if(existingConnectionReq){
-    return res.status(400).send({message:"Connection Request Already Existis"});
+    if(existingConnectionReq){
+    return res.json({message:"Connection Request Already Exists", data: existingConnectionReq});
    }
 
    const connectionRequest = new ConnectionRequest({
