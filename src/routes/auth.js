@@ -39,7 +39,7 @@ const user = new User({
   const token=await savedUser.getJWT();
 
   res.cookie("token",token,{
-    expires:newDate(Date.now()+8*3600000),
+    expires:new Date(Date.now()+8*3600000),
   })
 
   res.json({message: "User added Succesfully",data: savedUser});
