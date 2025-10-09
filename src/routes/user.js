@@ -52,24 +52,24 @@ userRouter.get("/user",async (req,res)=>{
 
 
 //get all the pending connection request for the logged in user 
-userRouter.get("/user/requests/received",UserAuth,async (req,res)=>{
-   try{
-    const loggedinUser=req.user;
-    //jtr find will return array and find one will return object
-    const connectionRequests=await ConnectionRequest.find({
-    touserId: loggedinUser._id,
-    status:"interested"
-    }).populate("fromUserId",USER_SAFE_DATA);
+userRouter.get("/user/requests/received", UserAuth, async (req, res) => {
+  try {
+    const loggedinUser = req.user;
+
+    const connectionRequests = await ConnectionRequest.find({
+      touserId: loggedinUser._id,
+      status: "interested",
+    }).populate("fromuserId", USER_SAFE_DATA);
 
     res.json({
-      message:"Data sent Succesfully",
+      message: "Data sent successfully",
       data: connectionRequests,
-    })
+    });
+  } catch (err) {
+    res.status(400).send("Error: " + err.message);
+  }
+});
 
-   }catch(err){
-    req.status(400).send("Error:"+err.message);
-   }
-})
 
 userRouter.get("/user/connections",UserAuth,async (req,res)=>{
   try{
@@ -80,8 +80,8 @@ userRouter.get("/user/connections",UserAuth,async (req,res)=>{
         {touserId:loggedinUser._id,status:"accepted"},
         {fromUserId:loggedinUser._id,status:"accepted"},
       ],
-    }).populate("fromUserId",USER_SAFE_DATA)
-    .populate("toUserId",USER_SAFE_DATA);
+    }).populate("fromuserId", USER_SAFE_DATA)
+     .populate("touserId", USER_SAFE_DATA);
 
     const data=connectionRequests.map(row=> {
       if(row.fromUserId._id.toString()===loggedinUser._id.toString()){
