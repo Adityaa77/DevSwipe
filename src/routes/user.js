@@ -97,41 +97,43 @@ userRouter.get("/user/connections",UserAuth,async (req,res)=>{
 });
 
 //to feed the user the accepted connections
-userRouter.get("/feed",UserAuth,async(req,res)=>{
-  try{
-   const loggedinUser=req.user;
+userRouter.get("/feed", UserAuth, async(req, res) => {
+  try {
+    const loggedinUser = req.user;
 
-   const page=parseInt(req.query.page) ||1;
-   let limit=parseInt(req.query.limit)||10;
-   limit=limit>50?50:limit;
+    const page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    limit = limit > 50 ? 50 : limit;
 
-   const skip=(page-1)* limit;
+    const skip = (page-1) * limit;
 
-   const connectionRequests=await ConnectionRequest.find({
-    $or:[
-      {fromUserId:loggedinUser._id},{touserId:loggedinUser._id},
-    ]
-   }).select("fromUserId toUserId");
+    const connectionRequests = await ConnectionRequest.find({
+      $or: [
+        { fromuserId: loggedinUser._id },  // Changed from fromUserId to fromuserId
+        { touserId: loggedinUser._id }     // This one matches your schema
+      ]
+    }).select("fromuserId touserId");      // Changed field names here too
 
-   const hiddenUsersFromFeed=new Set();
-   connectionRequests.forEach((req)=>{
-    hiddenUsersFromFeed.add(req.fromUserId.toString());
-    hiddenUsersFromFeed.add(req.touserId.toString());
-   });
+    const hiddenUsersFromFeed = new Set();
+    connectionRequests.forEach((req) => {
+      if (req.fromuserId) hiddenUsersFromFeed.add(req.fromuserId.toString());  // Added null check
+      if (req.touserId) hiddenUsersFromFeed.add(req.touserId.toString());      // Added null check
+    });
     
-  const users=await User.find({
-    $and: [
-      {_id: {$nin: Array.from(hiddenUsersFromFeed)}},
-      {_id: {$ne: loggedinUser._id}},
-    ],
-  })
-  .select(USER_SAFE_DATA)
-  .skip(skip)
-  .limit(limit);
+    const users = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hiddenUsersFromFeed) }},
+        { _id: { $ne: loggedinUser._id }},
+      ],
+    })
+    .select(USER_SAFE_DATA)
+    .skip(skip)
+    .limit(limit);
 
-  res.json({ data: users });
-  }catch(err){
-    res.status(400).send("Error:"+err.message);
+    res.json({ data: users });
+  } catch(err) {
+    res.status(400).send("Error:" + err.message);
   }
-})
+});
+
 module.exports=userRouter;
