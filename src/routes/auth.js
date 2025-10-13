@@ -77,7 +77,7 @@ const isPasswordValid = await user.getPassword(Password);
 });
 
 authRouter.post("/logout", async (req,res)=>{
-res.cookie("taken",null,{
+res.cookie("token",null,{
   expires:new Date(Date.now()),
 });
   res.send("Logout Succesful");
