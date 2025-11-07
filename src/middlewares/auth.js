@@ -8,7 +8,7 @@ const UserAuth = async (req, res, next) => {
 
     let decodeObj;
     try {
-      decodeObj = jwt.verify(token, "Dev@Swipe$2004");
+      decodeObj = jwt.verify(token, process.env.JWT_SECRET);
     } catch {
       return res.status(401).send("Invalid token");
     }

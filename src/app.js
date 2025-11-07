@@ -6,6 +6,9 @@ const connectDB=require("./config/database.js");
 const app=express();
 //cors
 const cors=require("cors");
+
+require("dotenv").config();
+
 app.use(cors({
   origin: "http://localhost:5173",
   credentials:true,
@@ -39,7 +42,7 @@ app.use((err, req, res, next) => {
 connectDB()//correct way so the data is established first and then the server is set up
    .then(()=>{
     console.log("Data Connection Established");
-    app.listen(3000,()=>{
+    app.listen(process.env.PORT,()=>{
     console.log("Server is Succesfully Running on Port-3000");
      });
    })
