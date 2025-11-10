@@ -7,6 +7,8 @@ const app=express();
 //cors
 const cors=require("cors");
 
+const http=require("http");
+
 require("dotenv").config();
 
 app.use(cors({
@@ -27,6 +29,7 @@ const authRouter=require("./routes/auth.js");
 const profileRouter=require("./routes/profile.js");
 const requestRouter=require("./routes/ConnectionReq.js");
 const userRouter=require("./routes/user.js");
+const initializeSocket = require("./utls/socket.js");
 
 app.use("/",authRouter);
 app.use("/",profileRouter);
@@ -39,10 +42,13 @@ app.use((err, req, res, next) => {
   res.status(500).send('Server Error');
 });
 
+const server=http.createServer(app);
+initializeSocket(server);
+
 connectDB()//correct way so the data is established first and then the server is set up
    .then(()=>{
     console.log("Data Connection Established");
-    app.listen(process.env.PORT,()=>{
+    server.listen(process.env.PORT,()=>{
     console.log("Server is Succesfully Running on Port-3000");
      });
    })
